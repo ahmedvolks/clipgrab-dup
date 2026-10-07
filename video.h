@@ -89,6 +89,7 @@ public:
     virtual QString getSafeFilename();
     QString getTargetFilename() {return targetFilename;};
     QString getFinalFilename() {return finalFilename;};
+    QString getLastError() const {return lastError;};
     virtual state getState() {return state;};
     virtual qint64 getDownloadSize();
     virtual qint64 getDownloadProgress();
@@ -121,6 +122,8 @@ protected:
 
     QString finalDownloadFilename;
     QProcess* youtubeDl;
+    QString lastError;
+    void setLastError(const QString& errorText);
     void startYoutubeDl(QStringList);
     video::state state;
 

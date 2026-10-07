@@ -144,6 +144,12 @@ private:
      QTimer searchTimer;
      void updateSearch(QString keywords);
      void updateYoutubeDlVersionInfo();
+     QString defaultTargetPath(video* video);
+     QString findDuplicateFile(const QString &target);
+     bool videoAlreadyQueued(const QString &url);
+     bool confirmDuplicateDownload(video* video, const QString &existingFile, bool queued);
+     void showDuplicateWarning(const QString &path);
+     void clearDuplicateWarning();
 
 private slots:
     void handleCurrentVideoStateChanged(video*);
@@ -175,6 +181,8 @@ private slots:
 
     void handleFinishedConversion(video*);
     void on_settingsLanguage_currentIndexChanged(int index);
+    void on_youtubeDlUpdateButton_clicked();
+    void on_settingsCookiesBrowser_currentIndexChanged(int index);
     void on_buttonDonate_clicked();
     void on_settingsUseWebM_toggled(bool checked);
     void on_settingsIgnoreSSLErrors_toggled(bool checked);

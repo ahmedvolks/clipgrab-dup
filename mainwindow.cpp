@@ -28,6 +28,7 @@ MainWindow::MainWindow(ClipGrab* cg, QWidget *parent, Qt::WindowFlags flags)
 {
     this->cg = cg;
     ui.setupUi(this);
+    ui.downloadInfoBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
 }
 
 
@@ -71,6 +72,7 @@ void MainWindow::init()
         if (!url.startsWith("http://") && !url.startsWith("https://")) return;
 
         ui.downloadLineEdit->setReadOnly(true);
+        clearDuplicateWarning();
         ui.downloadInfoBox->setText(tr("Please wait while ClipGrab is loading information about the video ..."));
         disableDownloadUi();
         cg->fetchVideoInfo(url);
@@ -105,12 +107,21 @@ void MainWindow::init()
     ui.searchWebEngineView->setContextMenuPolicy(Qt::NoContextMenu);
     connect(ui.searchWebEngineView->page(), SIGNAL(linkClicked(QUrl)), this, SLOT(handleSearchResultClicked(QUrl)));
     connect(&searchTimer, SIGNAL(timeout()), this, SLOT(searchTimerTimeout()));
-    connect(cg, &ClipGrab::youtubeDlDownloadFinished, [=] {
+connect(cg, &ClipGrab::youtubeDlDownloadFinished, [=] {
         YoutubeDl::find(true);
         this->updateSearch("");
         this->updateYoutubeDlVersionInfo();
     });
-    connect(cg, &ClipGrab::searchFinished, this, &MainWindow::handleSearchResults);
+    connect(cg, &ClipGrab::youtubeDlUpdateFinished, [=](bool success, QString message) {
+        YoutubeDl::find(true);
+        this->updateYoutubeDlVersionInfo();
+        ui.youtubeDlUpdateButton->setEnabled(true);
+        if (success) {
+            QMessageBox::information(this, tr("Update youtube-dlp"), tr("youtube-dlp has been updated.\n%1").arg(message.isEmpty() ? tr("Up to date.") : message));
+        } else {
+            QMessageBox::warning(this, tr("Update youtube-dlp"), tr("Updating youtube-dlp failed:\n%1").arg(message.isEmpty() ? tr("Unknown error.") : message));
+        }
+    });
     cg->search();
 
     //*
@@ -138,6 +149,9 @@ void MainWindow::init()
     ui.settingsProxyPort->setValue(cg->settings.value("ProxyPort", "").toInt());
     ui.settingsProxyUsername->setText(cg->settings.value("ProxyUsername", "").toString());
     ui.settingsProxyType->setCurrentIndex(cg->settings.value("ProxyType", 0).toInt());
+
+    int cookiesIndex = ui.settingsCookiesBrowser->findData(cg->settings.value("CookiesFromBrowser", "").toString());
+    ui.settingsCookiesBrowser->setCurrentIndex(cookiesIndex < 0 ? 0 : cookiesIndex);
 
     connect(this->ui.settingsUseProxy, SIGNAL(toggled(bool)), this, SLOT(settingsProxyChanged()));
     connect(this->ui.settingsProxyAuthenticationRequired, SIGNAL(toggled(bool)), this, SLOT(settingsProxyChanged()));
@@ -270,10 +284,82 @@ void MainWindow::startDownload() {
     qDebug() << targetDirectory << filename;
 
     if (cg->settings.value("NeverAskForPath", false).toBool() == false) {
-       targetFileSelected(video, QFileDialog::getSaveFileName(this, tr("Select Target"), targetDirectory +"/" + filename));
+       //ClipGrab asks for confirmation itself when the target turns out to be a
+       //duplicate, so the file dialog must not ask a second time.
+       targetFileSelected(video, QFileDialog::getSaveFileName(this, tr("Select Target"), targetDirectory +"/" + filename, QString(), nullptr, QFileDialog::DontConfirmOverwrite));
     } else {
         targetFileSelected(video, targetDirectory + "/" + filename);
     }
+}
+
+QString MainWindow::defaultTargetPath(video* video)
+{
+    QString targetDirectory = cg->settings.value("savedPath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    return targetDirectory + "/" + video->getSafeFilename();
+}
+
+QString MainWindow::findDuplicateFile(const QString &target)
+{
+    QFileInfo targetInfo(target);
+    if (targetInfo.exists()) return targetInfo.absoluteFilePath();
+
+    QString baseName = targetInfo.completeBaseName();
+    if (baseName.isEmpty()) return QString();
+
+    //Look for files that the download of this video produced before
+    //(the converters save "Title.mp4" as "Title-1.mp4" on a name collision).
+    QDir targetDir = targetInfo.absoluteDir();
+    QRegExp duplicateNameMatcher(QRegExp::escape(baseName) + "(-\\d+)?\\..+", Qt::CaseInsensitive);
+    QStringList existingFiles = targetDir.entryList(QDir::Files);
+    for (const QString &existingFile : existingFiles) {
+        if (duplicateNameMatcher.exactMatch(existingFile)) {
+            return targetDir.absoluteFilePath(existingFile);
+        }
+    }
+    return QString();
+}
+
+bool MainWindow::videoAlreadyQueued(const QString &url)
+{
+    if (url.isEmpty()) return false;
+
+    for (video* queuedVideo : cg->downloads) {
+        if (queuedVideo->getUrl() == url) return true;
+    }
+    return false;
+}
+
+void MainWindow::showDuplicateWarning(const QString &path)
+{
+    ui.downloadInfoBox->setText(path.toHtmlEscaped());
+    ui.downloadStart->setStyleSheet("QPushButton { background-color: #c62828; color: #ffffff; font-weight: bold; }");
+    ui.downloadStart->setText(tr("Duplication, Download again?"));
+}
+
+void MainWindow::clearDuplicateWarning()
+{
+    ui.downloadStart->setStyleSheet(QString());
+    ui.downloadStart->setText(tr("Grab this clip!"));
+}
+
+bool MainWindow::confirmDuplicateDownload(video* video, const QString &existingFile, bool queued)
+{
+    QString text = tr("ClipGrab has detected a duplicate download.");
+
+    if (!existingFile.isEmpty()) {
+        text += "\n\n" + tr("The target file already exists:\n%1").arg(existingFile);
+    }
+    if (queued) {
+        text += "\n\n" + tr("This video is already in the download list.");
+    }
+    text += "\n\n" + tr("Downloading again will not replace the existing file. ClipGrab will save an additional copy instead (for example \"%1-1.mp4\").").arg(video->getSafeFilename());
+    text += "\n\n" + tr("Do you want to download this video again?");
+
+    QMessageBox box(QMessageBox::Warning, tr("ClipGrab - Duplicate download"), text, QMessageBox::Yes | QMessageBox::No, this);
+    box.setDefaultButton(QMessageBox::No);
+    box.setButtonText(QMessageBox::Yes, tr("Download again"));
+    box.setButtonText(QMessageBox::No, tr("Cancel"));
+    return box.exec() == QMessageBox::Yes;
 }
 
 void MainWindow::targetFileSelected(video* video, QString target)
@@ -285,6 +371,25 @@ void MainWindow::targetFileSelected(video* video, QString target)
         ui.settingsNeverAskForPath->setChecked(false);
         this->startDownload();
         return;
+    }
+
+    //*
+    //* Duplicate download detection
+    //*
+    QString existingFile = findDuplicateFile(target);
+    bool queued = videoAlreadyQueued(video->getUrl());
+    if (!existingFile.isEmpty() || queued) {
+        showDuplicateWarning(existingFile.isEmpty() ? target : existingFile);
+
+        if (!confirmDuplicateDownload(video, existingFile, queued)) {
+            Notifications::showMessage(tr("Duplicate download canceled"), tr("ClipGrab did not download “%title” again.").replace("%title", video->getTitle()), &systemTrayIcon);
+            return;
+        }
+
+        video->setProperty("duplicateTarget", true);
+        Notifications::showMessage(tr("Duplicate download confirmed"), tr("ClipGrab will save an additional copy of “%title”.").replace("%title", video->getTitle()), &systemTrayIcon);
+    } else {
+        clearDuplicateWarning();
     }
 
     if (cg->settings.value("saveLastPath", true).toBool() == true) {
@@ -321,13 +426,20 @@ void MainWindow::handleCurrentVideoStateChanged(video* video) {
     if (video != cg->getCurrentVideo()) return;
 
     if (video == nullptr) {
+        clearDuplicateWarning();
         ui.downloadInfoBox->setText(tr("Please enter the link to the video you want to download in the field below."));
         disableDownloadUi(true);
         return;
     }
 
     if (video->getState() == video::state::error) {
-        ui.downloadInfoBox->setText(tr("No downloadable video could be found.<br />Maybe you have entered the wrong link or there is a problem with your connection."));
+        clearDuplicateWarning();
+        QString detail = video->getLastError();
+        if (detail.isEmpty()) {
+            ui.downloadInfoBox->setText(tr("No downloadable video could be found.<br />Maybe you have entered the wrong link or there is a problem with your connection."));
+        } else {
+            ui.downloadInfoBox->setText(tr("No downloadable video could be found: %1").arg(detail.toHtmlEscaped()));
+        }
         ui.downloadLineEdit->setReadOnly(false);
         disableDownloadUi(true);
     }
@@ -337,7 +449,18 @@ void MainWindow::handleCurrentVideoStateChanged(video* video) {
     ui.mainTab->setCurrentIndex(1);
     disableDownloadUi(false);
     ui.downloadLineEdit->setReadOnly(false);
+    clearDuplicateWarning();
     ui.downloadInfoBox->setText("<strong>" + video->getTitle() + "</strong>");
+
+    //*
+    //* Flag duplicates (file already on disk or video already in the list)
+    //* with the copyable file path before the download is started.
+    //*
+    QString expectedPath = defaultTargetPath(video);
+    QString existingFile = findDuplicateFile(expectedPath);
+    if (!existingFile.isEmpty() || videoAlreadyQueued(video->getUrl())) {
+        showDuplicateWarning(existingFile.isEmpty() ? expectedPath : existingFile);
+    }
 
     this->updatingComboQuality = true;
     ui.downloadComboQuality->clear();
@@ -685,6 +808,18 @@ void MainWindow::on_settingsLanguage_currentIndexChanged(int index)
     cg->settings.setValue("Language", cg->languages.at(index).code);
 }
 
+void MainWindow::on_youtubeDlUpdateButton_clicked()
+{
+    ui.youtubeDlUpdateButton->setEnabled(false);
+    cg->updateYoutubeDl();
+}
+
+void MainWindow::on_settingsCookiesBrowser_currentIndexChanged(int index)
+{
+    Q_UNUSED(index);
+    cg->settings.setValue("CookiesFromBrowser", ui.settingsCookiesBrowser->currentData().toString());
+}
+
 void MainWindow::on_buttonDonate_clicked()
 {
     QDesktopServices::openUrl(QUrl("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=AS6TDMR667GJL"));
@@ -717,6 +852,7 @@ void MainWindow::on_downloadTree_customContextMenuRequested(const QPoint &point)
     QAction* cancelDownload = contextMenu.addAction(tr("&Cancel download"));
     contextMenu.addSeparator();
     QAction* copyLink = contextMenu.addAction(tr("Copy &video link"));
+    QAction* copyPath = contextMenu.addAction(tr("Copy file &path"));
     QAction* openLink = contextMenu.addAction(tr("Open video link in &browser"));
 
     if (selectedVideo->getState() == video::state::paused) {
@@ -742,7 +878,13 @@ void MainWindow::on_downloadTree_customContextMenuRequested(const QPoint &point)
 
     QAction* selectedAction = contextMenu.exec(ui.downloadTree->mapToGlobal(point));
     if (selectedAction == restartDownload) {
-        selectedVideo->restart();
+        QString existingFile = findDuplicateFile(selectedVideo->getTargetFilename());
+        if (existingFile.isEmpty() || confirmDuplicateDownload(selectedVideo, existingFile, false)) {
+            if (!existingFile.isEmpty()) {
+                selectedVideo->setProperty("duplicateTarget", true);
+            }
+            selectedVideo->restart();
+        }
     } else if (selectedAction == cancelDownload) {
         selectedVideo->cancel();
     } else if (selectedAction == pauseDownload) {
@@ -760,6 +902,9 @@ void MainWindow::on_downloadTree_customContextMenuRequested(const QPoint &point)
         QDesktopServices::openUrl(QUrl(link));
     } else if (selectedAction == copyLink) {
         QApplication::clipboard()->setText(selectedVideo->getUrl());
+    } else if (selectedAction == copyPath) {
+        QString path = selectedVideo->getFinalFilename().isEmpty() ? selectedVideo->getTargetFilename() : selectedVideo->getFinalFilename();
+        QApplication::clipboard()->setText(path);
     }
 
     contextMenu.deleteLater();

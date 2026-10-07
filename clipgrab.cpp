@@ -558,7 +558,7 @@ void ClipGrab::updateDownloadFinished()
 }
 
 void ClipGrab::downloadYoutubeDl(bool force) {
-    QString minVersion = QSettings().value("minYoutubeDlVersion", "2021.09.25").toString();
+    QString minVersion = QSettings().value("minYoutubeDlVersion", "2026.01.01").toString();
     bool youtubeDlInstalled = !YoutubeDl::find().isEmpty();
     if (force == false && youtubeDlInstalled) {
         QString installedVersion = YoutubeDl::getVersion();
@@ -641,8 +641,15 @@ void ClipGrab::updateYoutubeDl() {
     youtubeDlUpdateProcess = YoutubeDl::instance(QStringList() << "--update");
     youtubeDlUpdateProcess->start();
     connect(youtubeDlUpdateProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [=] {
+        QProcess::ExitStatus status = youtubeDlUpdateProcess->exitStatus();
+        int exitCode = youtubeDlUpdateProcess->exitCode();
+        QString output = youtubeDlUpdateProcess->readAllStandardOutput().trimmed();
+        QString error = youtubeDlUpdateProcess->readAllStandardError().trimmed();
+        if (!error.isEmpty()) output = output.isEmpty() ? error : output + "\n" + error;
+        bool success = (status == QProcess::ExitStatus::NormalExit && exitCode == 0);
         youtubeDlUpdateProcess->deleteLater();
         youtubeDlUpdateProcess = nullptr;
+        emit youtubeDlUpdateFinished(success, output);
     });
 }
 

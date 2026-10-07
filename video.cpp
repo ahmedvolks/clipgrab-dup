@@ -36,8 +36,24 @@ video::video() {
     duration = 0;
 }
 
+void video::setLastError(const QString& errorText) {
+    QStringList lines = errorText.split("\n");
+    QString match;
+    for (const QString& line : lines) {
+        if (line.trimmed().contains("ERROR:", Qt::CaseInsensitive)) match = line.trimmed();
+    }
+    if (match.isEmpty()) {
+        for (auto it = lines.crbegin(); it != lines.crend(); ++it) {
+            if (!it->trimmed().isEmpty()) { match = it->trimmed(); break; }
+        }
+    }
+    if (match.startsWith("ERROR:", Qt::CaseInsensitive)) match = match.mid(6).trimmed();
+    lastError = match;
+}
+
 void video::startYoutubeDl(QStringList arguments) {
     if (youtubeDl != nullptr) youtubeDl->deleteLater();
+    lastError.clear();
 
     youtubeDl = YoutubeDl::instance(arguments);
     connect(youtubeDl , QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &video::handleProcessFinished);
@@ -104,11 +120,11 @@ void video::download() {
     arguments << "-o" << fileTemplate;
 
     if (quality.audioFormat.isEmpty()) {
-        arguments << "-f" << quality.videoFormat;
+        arguments << "-f" << quality.videoFormat + "/b";
     } else if (audioOnly) {
-        arguments << "-f" << quality.audioFormat;
+        arguments << "-f" << quality.audioFormat + "/ba/b";
     } else {
-        arguments << "-f" << quality.videoFormat + "+" + quality.audioFormat;
+        arguments << "-f" << quality.videoFormat + "+" + quality.audioFormat + "/bv*+ba/b";
     }
 
     arguments << url;
@@ -453,6 +469,7 @@ void video::handleDownloadInfo(QString line) {
     match = re.match(line);
     if (match.hasMatch()) {
         qDebug() << "ERROR!" << match.captured(1);
+        setLastError(line);
         state = state::error;
         emit stateChanged();
         youtubeDl->kill();
@@ -472,7 +489,8 @@ void video::setTargetFilename(QString filename) {
 }
 
 QString video::getSafeFilename() {
-    return title.replace(QRegularExpression("#|%|&|\\{|\\}|\\\\|<|>|\\*|\\?|/|\\$|!|'|\"|:|@|\\+|`|\\||=|"), "");
+    QString safeTitle = title;
+    return safeTitle.replace(QRegularExpression("#|%|&|\\{|\\}|\\\\|<|>|\\*|\\?|/|\\$|!|'|\"|:|@|\\+|`|\\||=|"), "");
 }
 
 void video::setConverter(converter* targetConverter, int targetConverterMode) {
@@ -549,7 +567,8 @@ QList<video*> video::getPlaylistVideos() {
 }
 
 void video::handleProcessFinished(int /*exitCode*/, QProcess::ExitStatus exitStatus) {
-    qDebug() << youtubeDl->readAllStandardError();
+    QString stderrOutput = youtubeDl->readAllStandardError();
+    if (!stderrOutput.isEmpty()) qDebug() << stderrOutput;
     switch (state) {
     case state::fetching:
         if (exitStatus == QProcess::ExitStatus::NormalExit) {
@@ -561,9 +580,11 @@ void video::handleProcessFinished(int /*exitCode*/, QProcess::ExitStatus exitSta
                 state = state::fetched;
             } else {
                 state = state::error;
+                setLastError(stderrOutput.isEmpty() ? tr("No downloadable video could be found.") : stderrOutput);
             }
         } else {
             state = state::error;
+            setLastError(stderrOutput);
         }
         emit stateChanged();
         break;
@@ -573,6 +594,7 @@ void video::handleProcessFinished(int /*exitCode*/, QProcess::ExitStatus exitSta
             if (finalDownloadFilename.isEmpty() && !downloadFilenames.empty()) finalDownloadFilename = downloadFilenames.last();
             if (finalDownloadFilename.isEmpty()) {
                 state = state::error;
+                setLastError(stderrOutput);
                 emit stateChanged();
                 return;
             }
@@ -583,6 +605,7 @@ void video::handleProcessFinished(int /*exitCode*/, QProcess::ExitStatus exitSta
             targetConverter->startConversion(file, targetFilename, qualities.at(selectedQuality).containerName, metaTitle, metaArtist, targetConverterMode);
         } else {
             state = state::error;
+            setLastError(stderrOutput);
         }
         emit stateChanged();
         break;
@@ -622,7 +645,8 @@ void video::handleConversionFinished() {
     emit stateChanged();
 }
 
-void video::handleConversionError(QString /*error*/) {
+void video::handleConversionError(QString error) {
+    setLastError(error);
     state = state::error;
     emit stateChanged();
 }

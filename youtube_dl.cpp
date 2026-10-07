@@ -110,7 +110,13 @@ QProcess* YoutubeDl::instance(QString path, QStringList arguments) {
         networkArguments << "--force-ipv4";
     }
 
-    process->setArguments(QStringList() << path << arguments << proxyArguments << networkArguments);
+    QStringList cookieArguments;
+    QString cookiesBrowser = settings.value("CookiesFromBrowser", "").toString();
+    if (!cookiesBrowser.isEmpty()) {
+        cookieArguments << "--cookies-from-browser" << cookiesBrowser;
+    }
+
+    process->setArguments(QStringList() << path << arguments << proxyArguments << networkArguments << cookieArguments);
     process->setWorkingDirectory(QDir::tempPath());
     process->setProcessEnvironment(env);
     

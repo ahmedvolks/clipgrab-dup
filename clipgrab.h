@@ -188,6 +188,7 @@ class ClipGrab : public QObject
         void downloadFinished(video*);
         void searchFinished(video*);
         void youtubeDlDownloadFinished();
+        void youtubeDlUpdateFinished(bool success, QString message);
         void compatibleUrlFoundInClipboard(QString url);
         void allDownloadsCanceled();
         void updateInfoProcessed();

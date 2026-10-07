@@ -78,9 +78,21 @@ QVariant DownloadListModel::data(const QModelIndex &index, int role) const {
         }
     }
 
+    video* video = cg->downloads.at(cg->downloads.size() - index.row() -1);
+
+    //Confirmed duplicates show the file path once finished; the status
+    //column can be narrow, so the full path is repeated as tooltip.
+    if (role == Qt::ToolTipRole) {
+        if (index.column() != 4) return QVariant();
+        if (video->getState() == video::state::error && !video->getLastError().isEmpty()) return video->getLastError();
+        if (!video->property("duplicateTarget").toBool()
+                || video->getState() != video::state::finished) return QVariant();
+        QString path = video->getFinalFilename().isEmpty() ? video->getTargetFilename() : video->getFinalFilename();
+        return path;
+    }
+
     if (role != Qt::DisplayRole) return QVariant();
 
-    video* video = cg->downloads.at(cg->downloads.size() - index.row() -1);
     switch (index.column()) {
     case 0:
         return video->getPortalName();
@@ -105,6 +117,9 @@ QVariant DownloadListModel::data(const QModelIndex &index, int role) const {
         case video::state::converting:
             return tr("Converting ...");
         case video::state::finished:
+            if (video->property("duplicateTarget").toBool()) {
+                return video->getFinalFilename().isEmpty() ? video->getTargetFilename() : video->getFinalFilename();
+            }
             return tr("Finished");
         case video::state::paused:
             return tr("Paused");
@@ -113,7 +128,8 @@ QVariant DownloadListModel::data(const QModelIndex &index, int role) const {
         case video::state::unfetched:
             return tr("Waiting");
         default:
-            return tr("Failed");
+            if (video->getLastError().isEmpty()) return tr("Failed");
+            return tr("Failed: %1").arg(video->getLastError());
         }
     default: return "";
     }

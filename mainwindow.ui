@@ -754,9 +754,117 @@ padding: 10px;
                   </property>
                  </widget>
                 </item>
-               </layout>
+</layout>
               </widget>
-              <widget class="QWidget" name="tabWidgetPage4">
+               <widget class="QWidget" name="settingsCookiesTabPage">
+                <attribute name="title">
+                 <string>Network</string>
+                </attribute>
+                <layout class="QVBoxLayout" name="verticalLayoutCookies">
+                 <item>
+                  <widget class="QLabel" name="labelCookiesIntro">
+                   <property name="text">
+                    <string>Some videos (age-restricted, private, or region-locked) get blocked for anonymous downloads. Reuse the logged-in session of a browser installed on this machine:</string>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="settingsCookiesBrowser">
+                   <item>
+                    <property name="text">
+                     <string>Disabled</string>
+                    </property>
+                    <property name="data">
+                     <string></string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Firefox</string>
+                    </property>
+                    <property name="data">
+                     <string>firefox</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Google Chrome</string>
+                    </property>
+                    <property name="data">
+                     <string>chrome</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Chromium</string>
+                    </property>
+                    <property name="data">
+                     <string>chromium</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Microsoft Edge</string>
+                    </property>
+                    <property name="data">
+                     <string>edge</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Brave</string>
+                    </property>
+                    <property name="data">
+                     <string>brave</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Opera</string>
+                    </property>
+                    <property name="data">
+                     <string>opera</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Vivaldi</string>
+                    </property>
+                    <property name="data">
+                     <string>vivaldi</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelCookiesNotice">
+                   <property name="text">
+                    <string>Note: Chrome and Chromium keep their cookies encrypted while the browser is running; close them before downloading. If you are logged in to YouTube in the selected browser, private and age-restricted videos can be downloaded like the browser would.</string>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacerCookies">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tabWidgetPage4">
                <attribute name="title">
                 <string>Other</string>
                </attribute>
@@ -1149,6 +1257,13 @@ padding:4px;</string>
           </property>
           <property name="text">
            <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QPushButton" name="youtubeDlUpdateButton">
+          <property name="text">
+           <string>Update youtube-dlp now</string>
           </property>
          </widget>
         </item>
