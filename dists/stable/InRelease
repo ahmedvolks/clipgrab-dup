@@ -1,37 +1,45 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
 
-Date: Thu, 08 Oct 2026 10:55:13 +0000
+Origin: ahmedvolks
+Label: clipgrab-dup
+Suite: stable
+Codename: stable
+Version: 3.9.14-dup.1
+Architectures: amd64
+Components: main
+Description: APT repository for clipgrab-dup
+Date: Thu, 08 Oct 2026 11:18:30 UTC
 MD5Sum:
- af9d2fff9d99432630dbb40605147335               38 Release
+ 7c818ebdca68f4a4963332dbd99a141c              211 Release
  03f2c6b13780a088f4f5eee581c62cfb             1141 main/binary-amd64/Packages
  a6325d160f9d37adf9729987d7805583              707 main/binary-amd64/Packages.gz
 SHA1:
- bb36fac4c4c172149f918a2b42d37cea73b56f0e               38 Release
+ 416e69225d14df089649ef8264c9db49ef8903e3              211 Release
  9f286a24dce5c1225041cea694de86633b5cf60c             1141 main/binary-amd64/Packages
  1cc2ae648e7f39ed1acd1fc081d9acc4e2a9a685              707 main/binary-amd64/Packages.gz
 SHA256:
- 8c9e77e60b1658ca7d70e0049d82e5b8d3fbc77bd45338d75465c38ada9bf9f7               38 Release
+ e4a362c72d521d7541265ed974d91fa423a6f6bcb52bf06919f9d1844f850e9a              211 Release
  0d674cdd60f2f10f6a1f325f6d81db1461ee2f7fccb4ff7fb0dd48749c477265             1141 main/binary-amd64/Packages
  38c8bd872736de2170dfd5f0f804765db91333ea57dab7477b5230f1e0b4f61e              707 main/binary-amd64/Packages.gz
 SHA512:
- f2c708e45851cface49e9b6c27ca508370620515b3aeb0e11228d102124f4c3dd768a076971fbfb5db28da7363a1324a7e6dacc5b8ae260e4c1028c539636455               38 Release
+ 56891fe782bde604f310d7f8f24088587c0a8cedb181ff13e6c08f6bbca3a09c3c8bc1b455800864a1a6156f97c02fef88088a66419f4b3526591a7b4ec123d0              211 Release
  4e3737547542e301cac03fa7b52d47fc9b509eeef10a2c00145c9383794935373f756d7c9b9542a39b7a1f14cfea055e26e9e3add00dd89459f5edd75eb681d2             1141 main/binary-amd64/Packages
  9dadc06c2ac17b8a7d31534f957ac57ccadff6b795b6767822b01a4a2c0fe6dfae7a6458f1d2e389b0a62d130e7c33070db692a2f794df96ce57923143b4b25a              707 main/binary-amd64/Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-iQJJBAEBCgAzFiEEMmTeGaLAUpHyNggolWrXof4rgbsFAmrHdp0VHGFobWVkdm9s
-a3NAZ21haWwuY29tAAoJEJVq16H+K4G7jKAQANbr+QyoAUqWnPlQRxTKeR+80a9Q
-Zy8i3I3mW2GMsJ+NrJO6njxZRchlGdf/8rb2ea6pL9iqFukLuZOYeORiOCXtUV06
-tnOow23eeMUuSAHnKllv8ccjky4k3FEC3KO4r2wnXfcN/nM+gt0m9UvL1djGKrQE
-dAQh5pvyrGd5wC6abPFGsJoTzqRfb431Pi6pBJ1lYmE0rPJNp8x2kXt2jZQWZRPf
-jjbtdXc+lQXUpAXlDejHdVSy/BAyvBoMDHOYqoTJkCM89h47xuTPq2JAIzrUUDyf
-kEj6guYE29eUYv88g3/B9VZKouTpEqD9dfRUFzecZT7/Mrkz3gyLC1MXIIy3wynr
-8YVKXuMIk+w96IfCWHm3qA+Z0+56stG+2kdQaEDxu2AW99iwKwy2luBdTKIEaAjU
-eeKp/g3Q/gprrPT5A5SV/r0FVq8NHxIAhDfpATq6gi/a8WAjlm1UgVU9eMe4zwZ8
-wfeG1FzxfMtSdqhSn0P4JKk3rYE8+LanWq35xMpTmD1oG9qZXrNaEn5mHNIVouAG
-XnVhxIKdm50BaUeYppiZSpvHOYlxe9HgAqmowUWs4fBX8hl/uNFjBbZv5ufxbFm7
-Xd+Z7XEhMxBYPqqW4VDDZXIUBHW5ClVoigDQyB0bDl6EkFCHun4VHV7hwfj2x/Gl
-YFSl7LRixByAN5GX
-=3mYa
+iQJJBAEBCgAzFiEEMmTeGaLAUpHyNggolWrXof4rgbsFAmrHfDAVHGFobWVkdm9s
+a3NAZ21haWwuY29tAAoJEJVq16H+K4G7tV4P/0PIfj2Rq+A8bAuUmUQuarB7A5+2
+RAJggDRtPhcD++67A6iwxowdtlX8chI0yPU9kLLlVud12C4erW0n17cQ3wkr2Hf+
+z71xvilumr6CrqJeFUC7uwk/KH11rNhQ7VjtWtOkLyNmubP16xaG++tNJEIcE4ID
+DIpb1kiPnNsQUaAnQ7PnR0GYZpjcb+6sR061YCxY1wKT72rC3yplTeskN2Y9kP41
+yM9h+Vx8AhM0iBKIfRT87UXb4HaKtAXt9y+i6N/ImiQQ8VPyOsGWiFli7vl07IGU
+LnHD8w2PmMGL/NupYWafhoTPkQXKxzW1yncajFEHSkyQHcZghjb34mlCiIZXTHFT
+cugvYngwprNSbpNder+jkAVqyd0ohZ6I/p/kAsQZ2a8vox1YlQYan0/sJPEm0g8d
+RXl/Zfp3Mkm4wKHZk+6EWRuuELQKgXuRorLF76XQmCb/IkXNXxdtmMjF/wivmfyD
+3EZ7SEOuC8NeXDe2/EAScsYMOS7kIpuhF4Almr+akUDSXIxxd9rrNPuQS3+Rd9VC
+aPA3lM8CLZv0RwpAIpDwNl9KMlaubUl3QTuJGRAwWn/RTO3sBAIab3afo1Zt8Hxa
+JLYAwTOw62djZWxcG2s9QDOEYIghMsC/LN0IPPDgBQBOdtmddKEUzOjrpIcI7+it
+Olk5mjSTQU/Sb1sH
+=Yd5F
 -----END PGP SIGNATURE-----
