@@ -1,7 +1,6 @@
 # Installation Instructions
 
-## Ubuntu/Debian (Recommended for .deb users)
-
+## Option 1: Install via apt from a local .deb file (works everywhere)
 Download the .deb from the release page:
 https://github.com/ahmedvolks/clipgrab-dup/releases/download/v3.9.14-dup.1/clipgrab-dup_3.9.14-dup.1_amd64.deb
 
@@ -15,6 +14,16 @@ Uninstall:
 sudo apt remove clipgrab-dup
 ```
 
+## Option 2: "apt install clipgrab-dup" directly (requires an apt repository)
+Running `apt install clipgrab-dup` without a local path only works if you have added an apt repository (PPA, or a custom .deb repo) that hosts this package. This release is distributed as a direct .deb download on GitHub, not published to a PPA yet.
+
+To make `apt install clipgrab-dup` work, you can:
+- Use a PPA on Launchpad, or
+- Host your own apt repository (e.g. using GitHub Pages + aptly), or
+- Use a package manager like `apt-get` with `dpkg` directly as in Option 1.
+
+If you want, tell me whether you prefer Launchpad PPA or GitHub Pages apt repo, and I can set it up.
+
 ## AppImage (Linux, any distribution)
 
 Download the AppImage:
@@ -26,12 +35,6 @@ chmod +x clipgrab-dup_3.9.14-dup.1_x86_64.AppImage
 ./clipgrab-dup_3.9.14-dup.1_x86_64.AppImage
 ```
 
-To integrate with your system (optional), you can use [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) or move it to a known location and create a desktop entry.
-
-## Other Linux distributions
-
-The AppImage should work on most modern Linux x86_64 systems. Alternatively, build from source.
-
 ## Build from source
 
 Clone the repository:
@@ -41,9 +44,3 @@ cd clipgrab-dup
 ./build.sh
 ./clipgrab
 ```
-
-Requirements (Debian/Ubuntu): `apt-get` available, `g++`, build-essential context; the script downloads Qt dev packages into `/tmp` root-free.
-
-## macOS / Windows
-
-This fork is built/tested primarily on Linux. Upstream ClipGrab provides macOS/Windows builds; this fork's changes (Qt5 C++) are portable, but prebuilt macOS/Windows binaries are not provided in this release. If you need them, build from source using the upstream build instructions adapted to this repo.
