@@ -1,43 +1,42 @@
 # Installation Instructions
 
-## Option 1: Install via apt from a local .deb file (works everywhere)
-Download the .deb from the release page:
-https://github.com/ahmedvolks/clipgrab-dup/releases/download/v3.9.14-dup.1/clipgrab-dup_3.9.14-dup.1_amd64.deb
+## Option 1: Install via APT (recommended)
 
-Install:
+Add the repository and install in one go:
 ```bash
+curl -fsSL https://ahmedvolks.github.io/clipgrab-dup/apt-setup.sh | sudo bash
+```
+
+Or manually:
+```bash
+curl -fsSL https://ahmedvolks.github.io/clipgrab-dup/KEY.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/clipgrab-dup.gpg
+echo "deb [signed-by=/etc/apt/keyrings/clipgrab-dup.gpg] https://ahmedvolks.github.io/clipgrab-dup stable main" | sudo tee /etc/apt/sources.list.d/clipgrab-dup.list
+sudo apt update
+sudo apt install clipgrab-dup
+```
+
+Update later with: `sudo apt update && sudo apt upgrade`
+
+Uninstall: `sudo apt remove clipgrab-dup`
+
+## Option 2: Download .deb directly
+
+Download from the release page and install:
+```bash
+wget https://github.com/ahmedvolks/clipgrab-dup/releases/download/v3.9.14-dup.1/clipgrab-dup_3.9.14-dup.1_amd64.deb
 sudo apt install ./clipgrab-dup_3.9.14-dup.1_amd64.deb
 ```
 
-Uninstall:
+## Option 3: AppImage (any Linux x86_64)
+
 ```bash
-sudo apt remove clipgrab-dup
-```
-
-## Option 2: "apt install clipgrab-dup" directly (requires an apt repository)
-Running `apt install clipgrab-dup` without a local path only works if you have added an apt repository (PPA, or a custom .deb repo) that hosts this package. This release is distributed as a direct .deb download on GitHub, not published to a PPA yet.
-
-To make `apt install clipgrab-dup` work, you can:
-- Use a PPA on Launchpad, or
-- Host your own apt repository (e.g. using GitHub Pages + aptly), or
-- Use a package manager like `apt-get` with `dpkg` directly as in Option 1.
-
-If you want, tell me whether you prefer Launchpad PPA or GitHub Pages apt repo, and I can set it up.
-
-## AppImage (Linux, any distribution)
-
-Download the AppImage:
-https://github.com/ahmedvolks/clipgrab-dup/releases/download/v3.9.14-dup.1/clipgrab-dup_3.9.14-dup.1_x86_64.AppImage
-
-Make it executable and run:
-```bash
+wget https://github.com/ahmedvolks/clipgrab-dup/releases/download/v3.9.14-dup.1/clipgrab-dup_3.9.14-dup.1_x86_64.AppImage
 chmod +x clipgrab-dup_3.9.14-dup.1_x86_64.AppImage
 ./clipgrab-dup_3.9.14-dup.1_x86_64.AppImage
 ```
 
 ## Build from source
 
-Clone the repository:
 ```bash
 git clone https://github.com/ahmedvolks/clipgrab-dup.git
 cd clipgrab-dup
